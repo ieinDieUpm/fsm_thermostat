@@ -1,66 +1,62 @@
-# Alarm system
+# Thermostat with FSM and ADC
 
-This project implements an alarm system with a PIR, a button and a LED. The HW configuration is shown in the following picture:
+This project implements a thermostat with an analog LM35 temperature sensor, and 2 LEDs. The HW configuration is shown in the following picture:
 
-![HW Alarm](docs/assets/imgs/fsm_alarm_bb.png)
+![HW Alarm](docs/assets/imgs/fsm_thermostat_bb.png)
 
 The system uses an FSM to manage the different states of the system and hardware. This picture shows the FSM of the system:
 
-![FSM Alarm](docs/assets/imgs/fsm_alarm.png)
+![FSM Alarm](docs/assets/imgs/fsm_thermostat.png)
 
-You can generate as many alarm system as you want by creating a new FSM and assigning the corresponding peripherals to the system. The system which is implemented in the `main.c` file. The system uses the following peripherals:
+The thermostat makes a measurement every time its timer is triggered. The measurement is done by the ADC peripheral. The ADC is configured to sample the temperature sensor in single mode. The timer is configured in the `PORT` file of the system.
 
-## PIR sensor
+| Parameter     | Value                        |
+| ------------- | ---------------------------- |
+| Define label  | THERMOSTAT_MEASUREMENT_TIMER |
+| Timer         | TIM2                         |
+| Interrupt     | TIM2_IRQHandler()            |
+| Time interval | 5 seconds                    |
+| Priority      | 2                            |
+| Subpriority   | 0                            |
 
-The PIR sensor is connected to the pin `PA10`. The sensor is configured as an input with no push-pull resistor. The sensor generates an interrupt when it detects movement. The interrupt is configured with the following settings:
+You can generate as many thermostat as you want by creating a new FSM and assigning the corresponding peripherals to the system. The system which is implemented in the `main.c` file. The system uses the following peripherals:
 
-| Parameter     | Value                    |
-| ------------- | ------------------------ |
-| Variable name | pir_sensor_home_alarm    |
-| Pin           | PA10 (D2 on Nucleo)      |
-| Mode          | Input                    |
-| Pull up/ down | No push no pull          |
-| Edge          | Both: Rising and Falling |
-| EXTI          | EXTI10                   |
-| ISR           | EXTI15_10_IRQHandler()   |
-| Priority      | 1                        |
-| Subpriority   | 0                        |
+## Temperature sensor
 
-## Button
+The temperature sensor used in the system is the LM35 (see [LM35 datasheet](https://www.ti.com/product/es-mx/LM35)). The sensor is connected to the pin `PA0`. The sensor is configured as an analog input with no push-pull resistor. The sensor is sampled in single mode with a sampling period given by the interruptions of a timer. All the configurations of the ADC are by default. The ADC is configured to interrupt when the conversion is completed. The ADC is configured with the following settings:
 
-The button is connected to the pin `PC13`. The button is configured as an input with no push-pull resistor. The button generates an interrupt when it is both pressed and released. The interrupt is configured with the following settings:
+| Parameter     | Value                  |
+| ------------- | ---------------------- |
+| Variable name | temp_sensor_thermostat |
+| Pin           | PA0 (A0 on Nucleo)     |
+| ADC           | ADC1                   |
+| Channel       | 0                      |
+| Mode          | Analog                 |
+| Pull up/ down | No push no pull        |
+| ISR           | ADC_IRQHandler()       |
+| Priority      | 1                      |
+| Subpriority   | 0                      |
 
-| Parameter     | Value                    |
-| ------------- | ------------------------ |
-| Variable name | button_home_alarm        |
-| Pin           | PC13 (B1 on Nucleo)      |
-| Mode          | Input                    |
-| Pull up/ down | No push no pull          |
-| Edge          | Both: Rising and Falling |
-| EXTI          | EXTI13                   |
-| ISR           | EXTI15_10_IRQHandler()   |
-| Priority      | 3                        |
-| Subpriority   | 0                        |
+## LEDs
 
-## LED
+There are two LEDs in the system. The first LED is the `led_heater_active` and the second LED is the `led_comfort_temperature`. The `led_heater_active` is used to indicate that the temperature is below the threshold and the heater activates to warm the thermal system. The `led_comfort_temperature` is used to indicate that the temperature is above the threshold and the thermal system is off.
 
-The LED is connected to the pin `PA5`. The LED is configured as an output with no push-pull resistor. The LED is used to indicate the state of the system. The LED is configured with the following settings:
+| Parameter     | Value                   |
+| ------------- | ----------------------- |
+| Variable name | led_comfort_temperature |
+| Pin           | PB3 (D3 on Nucleo)      |
+| Mode          | Output                  |
+| Pull up/ down | No push no pull         |
 
-| Parameter     | Value               |
-| ------------- | ------------------- |
-| Variable name | led_home_alarm      |
-| Pin           | PA5 (LD2 on Nucleo) |
-| Mode          | Output              |
-| Pull up/ down | No push no pull     |
+> [!WARNING]
+> If you want to use the `printf()` function using the SWO, you must change the pin of the `led_comfort_temperature` to another pin. The SWO pin is the `PB3` pin. If you use the `PB3` pin, the SWO pin will not work.
 
-The LED blinks with an interrupt interval of 500 ms and uses the TIM2 to generate the interrupt. The interrupt is configured with the following settings:
-
-| Parameter   | Value             |
-| ----------- | ----------------- |
-| Interrupt   | TIM2_IRQHandler() |
-| Interval    | 500 ms            |
-| Priority    | 2                 |
-| Subpriority | 0                 |
+| Parameter     | Value              |
+| ------------- | ------------------ |
+| Variable name | led_heater_active  |
+| Pin           | PB4 (D5 on Nucleo) |
+| Mode          | Output             |
+| Pull up/ down | No push no pull    |
 
 ## References
 

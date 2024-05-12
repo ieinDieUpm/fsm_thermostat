@@ -255,6 +255,137 @@ void port_system_gpio_config_alternate(GPIO_TypeDef *p_port, uint8_t pin, uint8_
   p_port->AFR[(uint8_t)(pin / 8)] |= (alternate << displacement);
 }
 
+//----------------------processing--------------------------------
+// ADC RELATED FUNCTIONS
+//------------------------------------------------------
+void port_system_adc_single_ch_init(ADC_TypeDef *p_adc, uint8_t channel, uint32_t cr_mode)
+{
+  // First of all, enable the source clock of the ADC before configuring any of its registers
+  if (p_adc == ADC1)
+  {
+    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; /* ADC1_CLK_ENABLE */
+  }
+  else if (p_adc == ADC2)
+  {
+    RCC->APB2ENR |= RCC_APB2ENR_ADC2EN; /* ADC2_CLK_ENABLE */
+  }
+  else if (p_adc == ADC3)
+  {
+    RCC->APB2ENR |= RCC_APB2ENR_ADC3EN; /* ADC3_CLK_ENABLE */
+  }
+
+  //-------------------------------------------------------------------------------------------
+  // 	ADC common configuration (ADC common control register (ADC_CCR))
+  //-------------------------------------------------------------------------------------------
+  // Reset the ADC (common to all ADCs)
+  RCC->APB2RSTR |= RCC_APB2RSTR_ADCRST;
+
+  // Short delay
+  __NOP(); // Also can be used 	(void)RCC->AHB2RSTR; as an example
+
+  // Clear the reset of the ADC (common to all ADCs)
+  RCC->APB2RSTR &= ~RCC_APB2RSTR_ADCRST;
+
+#if defined(USE_ADC_TEMP_VREFINT)
+  // Temperature sensor and Vref internal channels enable
+  ADC123_COMMON->CCR |= ADC_CCR_TSVREFE;
+#endif
+
+  // ADC prescaler to select the frequency of the clock to the ADC. By default, input ADC clock PCLK2 divided by 2.
+  // The clock of the ADC (ADCCLK) is common to all the ADCs. The clock is generated from the APB2 clock divided by a programmable prescaler (ADCPRE) that allows the ADC to work at a frequencies of fPCLK2/2, fPCLK2/4, fPCLK2/6, or fPCLK2/8.
+  ADC123_COMMON->CCR &= ~ADC_CCR_ADCPRE;
+
+  // DMA configuration (DMA mode). 0: DMA mode disabled by default.
+  ADC123_COMMON->CCR &= ~ADC_CCR_DMA;
+  
+  // Delay between 2 sampling phases. By default, 0000: 5*T_ADCCLK. This is used in dual and triple interleaved modes.
+  ADC123_COMMON->CCR &= ~ADC_CCR_DELAY;
+
+  // Multi ADC mode selection. By default, 00000; All ADCs independent.
+  ADC123_COMMON->CCR &= ~ADC_CCR_MULTI;
+
+  //-------------------------------------------------------------------------------------------
+  // 	ADC particular configuration (ADCx control register (ADC_CR1 and ADC_CR2))
+  //-------------------------------------------------------------------------------------------
+  // Disable the ADC
+  p_adc->CR2 &= ~ADC_CR2_ADON;
+
+  // ADC continuous conversion mode. 0: Single conversion mode by default.
+  p_adc->CR2 &= ~ADC_CR2_CONT;
+
+  // ADC DMA mode selection. 0: DMA mode disabled by default.
+  p_adc->CR2 &= ~ADC_CR2_DMA;
+
+  // ADC End of conversion selection in single mode. 1: End of conversion by EOC bit by default.
+  p_adc->CR2 |= ADC_CR2_EOCS;
+
+  // ADC alignment. 0: Right alignment by default.
+  p_adc->CR2 &= ~ADC_CR2_ALIGN;
+
+  // ADC configuration register 1 (ADC_CR1)
+  p_adc->CR1 = 0;
+
+  // Set some configuration bits of the ADC_CR1 register that are currently available to be set in this PORT implementation
+  // Interrupt enable (EOC, EOS, AWD, JEOC, JEOS)
+  p_adc->CR1 |= (cr_mode & ADC_CR1_EOCIE_Msk);
+
+  // Resolution of the ADC. 00: 12-bit resolution by default.
+  p_adc->CR1 |= (cr_mode & ADC_CR1_RES_Msk);
+
+  // Sampling time selection for the regular channels. 000: 3 cycles by default, for simplicity.
+  channel &= 0x1FU; // Only 16 channels are available
+
+  if (channel < 10)
+  {
+    p_adc->SMPR2 &= ~(ADC_SMPR2_SMP0 << (channel * 3));
+  }
+  else
+  {
+    p_adc->SMPR1 &= ~(ADC_SMPR1_SMP10 << ((channel - 10) * 3));
+  }
+
+  // Indicate how many channels are going to be converted in the sequence. 1 conversion by default.
+  p_adc->SQR1 &= ~ADC_SQR1_L;
+}
+
+void port_system_adc_interrupt_enable(uint8_t priority, uint8_t subpriority)
+{
+  NVIC_SetPriority(ADC_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), priority, subpriority));
+  NVIC_EnableIRQ(ADC_IRQn);
+}
+
+void port_system_adc_enable(ADC_TypeDef *p_adc)
+{
+  // Enable the ADC
+  p_adc->CR2 |= ADC_CR2_ADON;
+
+  // Wait for the ADC to be ready (approximately 10 us)
+  uint32_t delay = 10000;
+  while (delay--)
+    ;
+}
+
+void port_system_adc_disable(ADC_TypeDef *p_adc)
+{
+  // Disable the ADC
+  p_adc->CR2 &= ~ADC_CR2_ADON;
+}
+
+void port_system_adc_start_conversion(ADC_TypeDef *p_adc, uint8_t channel)
+{
+  channel &= 0x1FU; // Only 16 channels are available
+
+  // Since we are going to convert only one channel, we are going to use the first sequence register
+  p_adc->SQR3 = 0;
+  p_adc->SQR3 = channel;
+
+  // Clear the status register
+  p_adc->SR = 0;
+
+  // Start the conversion
+  p_adc->CR2 |= ADC_CR2_SWSTART;
+}
+
 // ------------------------------------------------------
 // POWER RELATED FUNCTIONS
 // ------------------------------------------------------

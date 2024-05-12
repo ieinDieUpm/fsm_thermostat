@@ -1,53 +1,53 @@
 /**
  * @file main.c
  * @author Josué Pagán (j.pagan@upm.es)
- * @brief Main file for the alarm system FSM.
+ * @brief Basic FSM reading analog data from a linear thermistor LM35
  * @version 0.1
- * @date 2024-04-01
+ * @date 2024-05-01
  *
  */
 
 /* INCLUDES */
 #include <stdio.h>
 #include "port_system.h"
-#include "fsm_alarm.h"
+#include "fsm_thermostat.h"
 
 /* MAIN FUNCTION */
 
 /**
  * @brief Main function
- * 
- * @return int 
+ *
+ * @return int
  */
 int main()
 {
     // Local variables
-    bool previous_alarm_status = false;
+    uint8_t previous_thermostat_status = UNKNOWN;
 
     /* Init board */
     port_system_init();
 
-    // Create an alarm system FSM and get a pointer to it
-    fsm_t *p_fsm_home_alarm = fsm_alarm_new(&button_home_alarm, &led_home_alarm, &pir_sensor_home_alarm);
+    // Create an thermostat FSM and get a pointer to it
+    fsm_t *p_fsm_thermostat = fsm_thermostat_new(&led_heater_active, &led_comfort_temperature, &temp_sensor_thermostat);
 
     while (1)
     {
         // Launch the FSM
-        fsm_fire(p_fsm_home_alarm);
+        fsm_fire(p_fsm_thermostat);
 
-        bool current_alarm_status = fsm_alarm_get_alarm_status(p_fsm_home_alarm);
-        if (current_alarm_status != previous_alarm_status)
+        uint8_t current_thermostat_status = fsm_thermostat_get_status(p_fsm_thermostat);
+        if (current_thermostat_status != previous_thermostat_status)
         {
-            uint32_t last_time_alarm = fsm_alarm_get_last_time_alarm(p_fsm_home_alarm);
-            if (current_alarm_status)
+            uint32_t last_time_activated = fsm_thermostat_get_last_time_event(p_fsm_thermostat, current_thermostat_status);
+            if (current_thermostat_status == ACTIVATION)
             {
-                printf("ALARM!!! Alarm activated at %ld\n", last_time_alarm);
+                printf("Thermostat ON at %ld\n", last_time_activated);
             }
-            else
+            else if (current_thermostat_status == DEACTIVATION)
             {
-                printf("Alarm deactivated\n");
+                printf("Thermostat OFF at %ld\n", last_time_activated);
             }
-            previous_alarm_status = current_alarm_status;
+            previous_thermostat_status = current_thermostat_status;
         }
     }
     return 0;

@@ -66,7 +66,7 @@
 			},
 			"args": [
 				"-Cbuild/stm32f446re/Debug", // PORTABILITY: change this to your platform
-				"${input:launchTargetID}",
+				"${input:cortexTargetID}",
 			]
 		},
 		{
@@ -94,7 +94,52 @@
 				"cortex-debug: Build (stm32f446re)", // PORTABILITY: change this to your platform				
 			],
 			"dependsOrder": "sequence",
-		},		
+		},
+		{
+			"label": "native: Run CMake",
+			"options": {
+				"cwd": "${workspaceRoot}"
+			},
+			"group": {
+				"kind": "build",
+			},
+			"command": "cmake",
+			"args": [
+				"--fresh",
+				"-Bbuild/native/Debug",
+				"-DPLATFORM=native",
+				"-DCMAKE_BUILD_TYPE=Debug",
+			],
+			"windows": {
+				"args": [
+					"-G", "MinGW Makefiles",
+					"-Bbuild/native/Debug",
+					"-DPLATFORM=native",
+					"-DCMAKE_BUILD_TYPE=Debug",
+				]
+			}
+		},
+		{
+			"label": "native: Build",
+			"dependsOn": [
+				"native: Run CMake"
+			],
+			"options": {
+				"cwd": "${workspaceRoot}"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"command": "make",
+			"windows": {
+				"command": "mingw32-make"
+			},
+			"args": [
+				"-Cbuild/native/Debug",
+				"${input:cortexTargetID}",
+			],
+		},
 		{
 			"label": "Run CMake",
 			"options": {
@@ -194,7 +239,26 @@
 				"-Cbuild/${input:platformID}/${input:buildType}",
 				"clean",
 			]
-		}	],
+		},
+		{
+			"label": "Run tests (PLATFORM MUST BE native, TARGET MUST BE all)",
+			"dependsOn": [
+				"Build"
+			],
+			"options": {
+				"cwd": "${workspaceRoot}",
+			},
+			"group": {
+				"kind": "test"
+			},
+			"command": "ctest",
+			"args": [
+				"--test-dir",
+				"build/${input:platformID}/${input:buildType}",
+				"--output-on-failure",
+			]
+		}
+	],
 	"inputs": [
 		{
 			"id": "runFresh",
@@ -212,6 +276,7 @@
 			"description": "Enter the platform:",
 			"default": "stm32f446re", // PORTABILITY: change this to your platform
 			"options": [
+				"native",
 				"stm32f401re",
 				"stm32f411re",
 				"stm32f446re",
@@ -234,7 +299,7 @@
 			]
 		},
 		{
-			"id": "launchTargetID",
+			"id": "cortexTargetID",
 			"type": "command",
 			"command": "extension.commandvariable.remember",
       		"args": { "key": "lasttarget" }

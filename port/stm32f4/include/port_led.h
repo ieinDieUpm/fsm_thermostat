@@ -16,9 +16,10 @@
 
 /* Defines and macros --------------------------------------------------------*/
 // HW Nucleo-STM32F446RE:
-#define LED_HOME_ALARM_GPIO GPIOA /*!< GPIO port of the LED2 in the Nucleo board */
-#define LED_HOME_ALARM_PIN 5      /*!< GPIO pin of the LED2 in the Nucleo board */
-#define LED_HOME_ALARM_TIMER TIM2 /*!< Timer to control the blinking of the LED2 in the Nucleo board */
+#define LED_HEAT_GPIO GPIOA /*!< GPIO port of the heating LED */
+#define LED_HEAT_PIN 5      /*!< GPIO pin of the heating LED */
+#define LED_COOL_GPIO GPIOB /*!< GPIO port of the deactivation LED */
+#define LED_COOL_PIN 4      /*!< GPIO pin of the deactivation LED */
 
 /* Typedefs --------------------------------------------------------------------*/
 /**
@@ -28,11 +29,11 @@ typedef struct
 {
     GPIO_TypeDef *p_port; /*!< GPIO where the LED is connected */
     uint8_t pin;          /*!< Pin/line where the LED is connected */
-    TIM_TypeDef *p_timer; /*!< Timer to control the blinking of the LED */
 } port_led_hw_t;
 
 /* Global variables -----------------------------------------------------------*/
-extern port_led_hw_t led_home_alarm; /*!< LED of the alarm system. Public for access to interrupt handlers. */
+extern port_led_hw_t led_heater_active; /*!< Heating LED of the thermostat. */
+extern port_led_hw_t led_comfort_temperature; /*!< Cooling LED of the thermostat. */
 
 /* Function prototypes and explanations ---------------------------------------*/
 /**
@@ -67,23 +68,5 @@ void port_led_off(port_led_hw_t *p_led);
  *
  */
 void port_led_toggle(port_led_hw_t *p_led);
-
-/**
- * @brief Configures the timer for the LED.
- *
- */
-void port_led_timer_setup(port_led_hw_t *p_led);
-
-/**
- * @brief Activates the timer for the LED for blinking.
- *
- */
-void port_led_timer_activate(port_led_hw_t *p_led);
-
-/**
- * @brief Deactivates the timer for the LED.
- *
- */
-void port_led_timer_deactivate(port_led_hw_t *p_led);
 
 #endif // PORT_LED_H_

@@ -7,9 +7,8 @@
 // Include headers of different port elements:
 #include "stm32f4xx.h"
 #include "port_system.h"
-#include "port_button.h"
 #include "port_led.h"
-#include "port_pir_sensor.h"
+#include "port_temp_sensor.h"
 
 //------------------------------------------------------
 // INTERRUPT SERVICE ROUTINES
@@ -30,59 +29,34 @@ void SysTick_Handler(void)
 }
 
 /**
- * @brief  This function handles Px10-Px15 global interrupts.
- *
- * First, this function identifies the line/ pin which has raised the interruption. Then, perform the desired action. Before leaving it cleans the interrupt pending register.
- *
- */
-void EXTI15_10_IRQHandler(void)
-{
-  // Button
-  if (EXTI->PR & BIT_POS_TO_MASK(button_home_alarm.pin))
-  {
-    if (port_button_read_gpio(&button_home_alarm)) // If the button is released (not pressed)
-    {
-      if (button_home_alarm.flag_pressed) // If the button was pressed before
-      {
-        button_home_alarm.flag_released = true; // Set the flag
-        button_home_alarm.flag_pressed = false; // Reset the flag
-      }
-    }
-    else // If the button is pressed
-    {
-      button_home_alarm.flag_released = false; // Reset the flag
-      button_home_alarm.flag_pressed = true;   // Set the flag
-    }
-
-    EXTI->PR |= BIT_POS_TO_MASK(button_home_alarm.pin); // Para limpiar el flag que se encuentre a ‘1’ hay que escribir un ‘1’ en dicho bit. Escribir ‘0’ no afecta al estado del bit
-  }
-
-  // PIR sensor
-  if (EXTI->PR & BIT_POS_TO_MASK(pir_sensor_home_alarm.pin))
-  {
-    if (port_pir_sensor_read_gpio(&pir_sensor_home_alarm))
-    {
-      port_pir_sensor_set_status(&pir_sensor_home_alarm, true);
-    }
-    else
-    {
-      port_pir_sensor_set_status(&pir_sensor_home_alarm, false);
-    }
-
-    EXTI->PR |= BIT_POS_TO_MASK(pir_sensor_home_alarm.pin);
-  }
-}
-
-/**
  * @brief Interrupt service routine for the TIM2 timer.
  *
  * @note This ISR is called when the TIM2 timer generates an interrupt.
- * The program flow jumps to this ISR and toggles the LED.
  *
  */
 void TIM2_IRQHandler(void)
 {
-  port_led_toggle(&led_home_alarm);
+  // Start the ADC conversion
+  port_system_adc_start_conversion(temp_sensor_thermostat.p_adc, temp_sensor_thermostat.pin);
   
   TIM2->SR &= ~TIM_SR_UIF; // Clear the update interrupt flag
+}
+
+/**
+ * @brief Interrupt service routine for all the ADCs.
+ *
+ * @note This ISR is called when any ADC generates an interrupt.
+ *
+ */
+void ADC_IRQHandler(void)
+{
+  // Identify if the ADC that generated the interrupt is the same as the temperature sensor
+  if (temp_sensor_thermostat.p_adc->SR & ADC_SR_EOC)
+  {
+    // Read the temperature sensor value
+    port_temp_sensor_save_adc_value(&temp_sensor_thermostat, temp_sensor_thermostat.p_adc->DR);
+    
+    // Clear the ADC interrupt flag
+    temp_sensor_thermostat.p_adc->SR &= ~ADC_SR_EOC;
+  }
 }

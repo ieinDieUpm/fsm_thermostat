@@ -4,7 +4,7 @@
     {
       "name": "Debug (stm32f446re)", // PORTABILITY: PORTABILITY: change this to your platform
       "cwd": "${workspaceRoot}",
-      "executable": "${workspaceFolder}/bin/stm32f446re/Debug/${input:launchTargetID}.elf", // PORTABILITY: change this to your platform
+      "executable": "${workspaceFolder}/bin/stm32f446re/Debug/${input:cortexTargetID}.elf", // PORTABILITY: change this to your platform
       "request": "launch",
       "runToEntryPoint": "main",
       "type": "cortex-debug",
@@ -32,7 +32,7 @@
     {
       "name": "Clean and Debug (stm32f446re)", // PORTABILITY: PORTABILITY: change this to your platform
       "cwd": "${workspaceRoot}",
-      "executable": "${workspaceFolder}/bin/stm32f446re/Debug/${input:launchTargetID}.elf", // PORTABILITY: change this to your platform
+      "executable": "${workspaceFolder}/bin/stm32f446re/Debug/${input:cortexTargetID}.elf", // PORTABILITY: change this to your platform
       "request": "launch",
       "runToEntryPoint": "main",
       "type": "cortex-debug",
@@ -56,11 +56,11 @@
           }
         ]
       }
-    }
+    },
   ],
   "inputs": [
     {
-      "id": "launchTargetID",
+      "id": "cortexTargetID",
       "type": "command",
       "command": "extension.commandvariable.pickStringRemember",
       "args": {
@@ -74,6 +74,6 @@
           "test_stm32f4"
         ]
       }
-    }
+    },
   ]
 }

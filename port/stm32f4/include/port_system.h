@@ -55,6 +55,16 @@
 #define TRIGGER_ENABLE_EVENT_REQ 0x04U                                 /*!< Interrupt mask to enable event requests */
 #define TRIGGER_ENABLE_INTERR_REQ 0x08U                                /*!< Interrupt mask to enable interrupt request */
 
+/* ADC */
+#define ADC_VREF_MV 3300U /*!< ADC reference voltage in mV */
+
+#define ADC_RESOLUTION_12B (0x00U << ADC_CR1_RES_Pos) /*!< 12-bit resolution */
+#define ADC_RESOLUTION_10B (0x01U << ADC_CR1_RES_Pos) /*!< 10-bit resolution */
+#define ADC_RESOLUTION_8B (0x02U << ADC_CR1_RES_Pos)  /*!< 8-bit resolution */
+#define ADC_RESOLUTION_6B (0x03U << ADC_CR1_RES_Pos)  /*!< 6-bit resolution */
+
+#define ADC_EOC_INTERRUPT_ENABLE (0x01U << ADC_CR1_EOCIE_Pos) /*!< End of conversion interrupt enable */
+
 /* Function prototypes and explanation -------------------------------------------------*/
 
 /**
@@ -234,5 +244,84 @@ void port_system_gpio_exti_enable(uint8_t pin, uint8_t priority, uint8_t subprio
  * @retval None
  */
 void port_system_gpio_exti_disable(uint8_t pin);
+
+/** @verbatim
+==============================================================================
+                ##### Steps to configure the ADC peripheral #####
+==============================================================================
+(#) Enable the ADC and GPIO clocks
+(#) Set the prescaler in the Common Control Register (CCR)
+(#) Set the Scan mode and Resolution in the Control Register 1 (CR1)
+(#) Set the Continuous Conversion, EOC, and Data Alignment in Control Register 2 (CR2)
+(#) Set the Sampling Time for the channel(s) in the ADC_SMPRx
+(#) Set the Regular channel sequence length in ADC_SQR1
+ @endverbatim
+******************************************************************************
+*/
+/**
+ * @brief Configure the ADC peripheral for a single channel
+ *
+ * It configures the given ADC peripheral and the common configuration for all the channels.
+ *
+ * The current implementation only supports setting the resolution and interrupt of EOC. Most of the configurations are set to default values. DMA is not supported in current implementation. As in example: \n
+ * \n
+ * Reset Configuration Register 1 (CR1) of the ADC. Current configuration sets the default values for: \n
+ * - Analog watchdog enable on regular channels \n
+ * - Discontinuous mode on regular channels \n
+ * - Discontinuous mode on injected channels \n
+ * - Automatic injected group conversion \n
+ * - Analog watchdog channel selection \n
+ * - Interrupt enable (EOC, EOS, AWD, JEOC, JEOS) \n
+ * - ADC analog watchdog interrupt enable \n
+ * - Interrupt enable for injected channels \n
+ * - Scan mode \n
+ * - ADC analog watchdog channel selection \n
+ * - Select the channel to convert \n
+ *
+ * @param p_adc ADC peripheral (CMSIS struct like)
+ * @param channel Channel number (from 0 to 15)
+ * @param cr_mode Control register mode. Currently, it only supports the end of conversion interrupt.
+ */
+void port_system_adc_single_ch_init(ADC_TypeDef *p_adc, uint8_t channel, uint32_t cr_mode);
+
+/**
+ * @brief Enable the ADC global interrupts in NVIC. ADC1, ADC2, and ADC3 share the same interrupt.
+ * 
+ * @param priority 
+ * @param subpriority 
+ */
+void port_system_adc_interrupt_enable(uint8_t priority, uint8_t subpriority);
+
+/**
+ * @brief Enable the ADC peripheral to work
+ *
+ * It enables the given ADC peripheral in CR2 register. It waits until the ADC stabilizes (10 us aprox).
+ * 
+ * @param p_adc ADC peripheral (CMSIS struct like)
+ */
+void port_system_adc_enable(ADC_TypeDef *p_adc);
+
+/**
+ * @brief Disable the ADC peripheral
+ *
+ * It disables the given ADC peripheral in CR2 register.
+ * 
+ * @param p_adc ADC peripheral (CMSIS struct like)
+ */
+void port_system_adc_disable(ADC_TypeDef *p_adc);
+
+/**
+ * @brief Start the conversion of the ADC peripheral
+ *
+ * It starts the conversion of the given ADC peripheral in CR2 register.
+ * 
+ * First it sets the channel sequence in the SQR register. Then, it clears the status register and starts the conversion by setting the SWSTART bit.
+ * 
+ * Since current implementation does not support DMA, we will only use 1 sequence and put 1 channel in the sequence register at a time.
+ * 
+ * @param p_adc ADC peripheral (CMSIS struct like)
+ * @param channel Channel number (from 0 to 15)
+ */
+void port_system_adc_start_conversion(ADC_TypeDef *p_adc, uint8_t channel);
 
 #endif /* PORT_SYSTEM_H_ */
