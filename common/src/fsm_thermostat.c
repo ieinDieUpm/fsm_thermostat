@@ -66,7 +66,7 @@ void do_thermostat_on(fsm_t *p_this)
 
     // Set the LEDs according to the thermostat status
     port_led_on(p_fsm->p_led_heat);
-    port_led_off(p_fsm->p_led_cool);
+    port_led_off(p_fsm->p_led_comfort);
 
     // Store the event
     p_fsm->last_events[p_fsm->event_idx] = ACTIVATION;
@@ -86,7 +86,7 @@ void do_thermostat_off(fsm_t *p_this)
 
     // Set the LEDs according to the thermostat status
     port_led_off(p_fsm->p_led_heat);
-    port_led_on(p_fsm->p_led_cool);
+    port_led_on(p_fsm->p_led_comfort);
 
     // Store the event
     p_fsm->last_events[p_fsm->event_idx] = DEACTIVATION;
@@ -132,18 +132,18 @@ uint8_t fsm_thermostat_get_status(fsm_t *p_this)
  * @brief Initialize the thermostat FSM
  *
  * @param p_this Pointer to the FSM structure
- * @param p_button Pointer to the button structure
  * @param p_led_heat Pointer to the LED structure
+ * @param p_led_comfort Pointer to the LED structure
  * @param p_temp Pointer to the temperature sensor structure
  */
-void fsm_thermostat_init(fsm_t *p_this, port_led_hw_t *p_led_heat, port_led_hw_t *p_led_cool, port_temp_hw_t *p_temp)
+void fsm_thermostat_init(fsm_t *p_this, port_led_hw_t *p_led_heat, port_led_hw_t *p_led_comfort, port_temp_hw_t *p_temp)
 {
     fsm_thermostat_t *p_fsm = (fsm_thermostat_t *)(p_this);
     fsm_init(p_this, fsm_trans_thermostat);
 
     // Assign the peripherals to the FSM
     p_fsm->p_led_heat = p_led_heat;
-    p_fsm->p_led_cool = p_led_cool;
+    p_fsm->p_led_comfort = p_led_comfort;
     p_fsm->p_temp_sensor = p_temp;
 
     // Initialize the last time the thermostat was activated
@@ -166,18 +166,18 @@ void fsm_thermostat_init(fsm_t *p_this, port_led_hw_t *p_led_heat, port_led_hw_t
 
     // Initialize the peripherals
     port_led_init(p_led_heat);
-    port_led_init(p_led_cool);
+    port_led_init(p_led_comfort);    
     port_temp_sensor_init(p_temp);
 }
 
 /* Create FSM */
-fsm_t *fsm_thermostat_new(port_led_hw_t *p_led_heat, port_led_hw_t *p_led_cool, port_temp_hw_t *p_temp)
+fsm_t *fsm_thermostat_new(port_led_hw_t *p_led_heat, port_led_hw_t *p_led_comfort, port_temp_hw_t *p_temp)
 {
     // Do malloc for the whole FSM structure to reserve memory for the rest of the FSM, although I interpret it as fsm_t which is the first field of the structure so that the FSM library can work with it
     fsm_t *p_fsm = malloc(sizeof(fsm_thermostat_t));
 
     // Initialize the FSM
-    fsm_thermostat_init(p_fsm, p_led_heat, p_led_cool, p_temp);
+    fsm_thermostat_init(p_fsm, p_led_heat, p_led_comfort, p_temp);
 
     return p_fsm;
 }

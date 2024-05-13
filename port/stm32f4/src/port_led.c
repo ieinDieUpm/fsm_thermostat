@@ -15,7 +15,8 @@
 
 /* Global variables -----------------------------------------------------------*/
 port_led_hw_t led_heater_active = {.p_port = LED_HEAT_GPIO, .pin = LED_HEAT_PIN};
-port_led_hw_t led_comfort_temperature = {.p_port = LED_COOL_GPIO, .pin = LED_COOL_PIN};
+port_led_hw_t led_comfort_temperature = {.p_port = LED_COMFORT_GPIO, .pin = LED_COMFORT_PIN};
+port_led_hw_t led_on = {.p_port = LED_ON_GPIO, .pin = LED_ON_PIN};
 
 bool port_led_get_status(port_led_hw_t *p_led)
 {

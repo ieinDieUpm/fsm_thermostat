@@ -15,7 +15,7 @@ The thermostat makes a measurement every time its timer is triggered. The measur
 | Define label  | THERMOSTAT_MEASUREMENT_TIMER |
 | Timer         | TIM2                         |
 | Interrupt     | TIM2_IRQHandler()            |
-| Time interval | 5 seconds                    |
+| Time interval | 1 second                     |
 | Priority      | 2                            |
 | Subpriority   | 0                            |
 
@@ -23,7 +23,7 @@ You can generate as many thermostat as you want by creating a new FSM and assign
 
 ## Temperature sensor
 
-The temperature sensor used in the system is the LM35 (see [LM35 datasheet](https://www.ti.com/product/es-mx/LM35)). The sensor is connected to the pin `PA0`. The sensor is configured as an analog input with no push-pull resistor. The sensor is sampled in single mode with a sampling period given by the interruptions of a timer. All the configurations of the ADC are by default. The ADC is configured to interrupt when the conversion is completed. The ADC is configured with the following settings:
+The temperature sensor used in the system is the LM35 (see [LM35 datasheet](https://www.ti.com/product/es-mx/LM35)). The sensor is located in the shield provided by the university. The sensor is connected to the pin `PA0`. The sensor is configured as an analog input with no push-pull resistor. The sensor is sampled in single mode with a sampling period given by the interruptions of a timer. All the configurations of the ADC are by default. The ADC is configured to interrupt when the conversion is completed. The ADC is configured with the following settings:
 
 | Parameter     | Value                  |
 | ------------- | ---------------------- |
@@ -39,17 +39,14 @@ The temperature sensor used in the system is the LM35 (see [LM35 datasheet](http
 
 ## LEDs
 
-There are two LEDs in the system. The first LED is the `led_heater_active` and the second LED is the `led_comfort_temperature`. The `led_heater_active` is used to indicate that the temperature is below the threshold and the heater activates to warm the thermal system. The `led_comfort_temperature` is used to indicate that the temperature is above the threshold and the thermal system is off.
+There are two LEDs in the system. The first LED is the `led_heater_active` (red) and the second LED is the `led_comfort_temperature` (blue). The `led_heater_active` is used to indicate that the temperature is below the threshold and the heater activates to warm the thermal system. The `led_comfort_temperature` is used to indicate that the temperature is above the threshold and the thermal system is off. The LEDs are within an RGB LED soldered in the shield provided by the university. The LEDs are connected to the pins `PB4` and `PB5`. The LEDs are configured as outputs with no push-pull resistor. The LEDs are turned on when the system starts. The LEDs are configured with the following settings:
 
 | Parameter     | Value                   |
 | ------------- | ----------------------- |
 | Variable name | led_comfort_temperature |
-| Pin           | PB3 (D3 on Nucleo)      |
+| Pin           | PB5 (D4 on Nucleo)      |
 | Mode          | Output                  |
 | Pull up/ down | No push no pull         |
-
-> [!WARNING]
-> If you want to use the `printf()` function using the SWO, you must change the pin of the `led_comfort_temperature` to another pin. The SWO pin is the `PB3` pin. If you use the `PB3` pin, the SWO pin will not work.
 
 | Parameter     | Value              |
 | ------------- | ------------------ |
@@ -57,6 +54,23 @@ There are two LEDs in the system. The first LED is the `led_heater_active` and t
 | Pin           | PB4 (D5 on Nucleo) |
 | Mode          | Output             |
 | Pull up/ down | No push no pull    |
+
+There is also a third LED, the `led_on` (green), which is used to indicate that the system has started. This LED is not part of the system. The `led_on` is turned on when the system starts and is turned off after 500 ms. This LED can be disabled by commenting the line `#define USE_LED_ON` in the `main.c` file. The `led_on` is connected to the pin `PB3`.
+
+| Parameter     | Value              |
+| ------------- | ------------------ |
+| Variable name | led_on             |
+| Pin           | PB3 (D3 on Nucleo) |
+| Mode          | Output             |
+| Pull up/ down | No push no pull    |
+
+> [!WARNING]
+> **If you want to use the `printf()` function using the SWO, you must change the pin of the `led_on` to another pin. The SWO pin is the `PB3` pin. If you use the `led_on`, the SWO pin will not work.**
+> If you want to use the SWO, you must comment the line `#define USE_LED_ON` in the `main.c` file. **In this case, **if you are using the shield provided by the university, the pin `PB3` will be active turning on the `led_on` constantly and you won't see pure red or blue LEDs but a mix of colors instead.**
+
+Look at the following picture to see the shield provided by the university:
+
+![Shield](docs/assets/imgs/shield.png)
 
 ## References
 

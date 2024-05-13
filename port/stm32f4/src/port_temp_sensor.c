@@ -20,6 +20,14 @@
 port_temp_hw_t temp_sensor_thermostat = {.p_port = TEMP_SENSOR_THERMOSTAT_GPIO, .pin = TEMP_SENSOR_THERMOSTAT_PIN, .p_adc = TEMP_SENSOR_THERMOSTAT_ADC, .temperature_celsius = 1.0};
 
 /* Private functions */
+
+/**
+ * @brief Converts an ADC value to millivolts. 
+ * 
+ * @param adcValue Counts of the ADC  
+ * @param adc_res_bits Resolution of the ADC in bits 
+ * @return uint32_t Millivolts 
+ */
 uint32_t _adc_to_mvolts(uint32_t adcValue, uint8_t adc_res_bits)
 {
     uint32_t mvolts = (ADC_VREF_MV * adcValue) / ((1 << adc_res_bits) - 1);
@@ -37,7 +45,8 @@ void port_temp_sensor_save_adc_value(port_temp_hw_t *p_temp, double adc_value)
     // LM35 sensor has a linear response of 10mV/°C
     p_temp->temperature_celsius = _adc_to_mvolts(adc_value, 12) / 10.0;
 
-    printf("Temperature: %ld oC\n", (uint32_t)(10*p_temp->temperature_celsius));
+    // There are few problems to print double values using printf with SWO. The value is multiplied by 10 and printed as an integer the decimal point is added manually.
+    printf("Temperature: %ld.%d oC\n", (uint32_t)(p_temp->temperature_celsius), (uint8_t)((10*p_temp->temperature_celsius))%10);
 }
 
 void port_temp_sensor_init(port_temp_hw_t *p_temp)

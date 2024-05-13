@@ -24,7 +24,7 @@
 /**
  * @brief Initializes the timer of the thermostat.
  *
- * @param thermostat Pointer to the thermostat structure.
+ * @param p_thermostat Pointer to the thermostat structure.
  */
 void port_thermostat_timer_setup(fsm_thermostat_t *p_thermostat);
 

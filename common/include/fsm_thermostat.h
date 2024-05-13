@@ -20,7 +20,7 @@
 
 /* Defines and enums ----------------------------------------------------------*/
 /* Defines */
-#define THERMOSTAT_TIMEOUT_SEC 5        /*!< Timeout for the thermostat to be activated */
+#define THERMOSTAT_TIMEOUT_SEC 1        /*!< Timeout for the thermostat to be activated */
 #define THERMOSTAT_HISTORY 10           /*!< Number of events to store in the thermostat */
 #define THERMOSTAT_DEFAULT_THRESHOLD 25 /*!< Threshold temperature to activate the thermostat */
 
@@ -54,7 +54,7 @@ typedef struct
 {
     fsm_t f;                                       /*!< FSM structure. Important to be the first element of the structure */
     port_led_hw_t *p_led_heat;                     /*!< Pointer to the heat LED structure */
-    port_led_hw_t *p_led_cool;                     /*!< Pointer to the cool LED structure */
+    port_led_hw_t *p_led_comfort;                  /*!< Pointer to the cool LED structure */
     port_temp_hw_t *p_temp_sensor;                 /*!< Pointer to the temperature sensor structure */
     bool last_events[THERMOSTAT_HISTORY];          /*!< Statuses of the thermostat */
     uint32_t last_time_events[THERMOSTAT_HISTORY]; /*!< Last times of events detected */
@@ -68,10 +68,11 @@ typedef struct
  * @brief Creates a new thermostat FSM.
  *
  * @param p_led_heat Pointer to the LED of the thermostat.
+ * @param p_led_comfort Pointer to the comfort LED of the thermostat.
  * @param p_temp Pointer to the temperature sensor of the thermostat.
  * @return fsm_thermostat_t* Pointer to the new thermostat FSM.
  */
-fsm_t *fsm_thermostat_new(port_led_hw_t *p_led_heat, port_led_hw_t *p_led_cool, port_temp_hw_t *p_temp);
+fsm_t *fsm_thermostat_new(port_led_hw_t *p_led_heat, port_led_hw_t *p_led_comfort, port_temp_hw_t *p_temp);
 
 /**
  * @brief Gets the last time there was an event in the thermostat. If the event is not found, it returns 0.

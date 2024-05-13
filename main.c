@@ -10,7 +10,11 @@
 /* INCLUDES */
 #include <stdio.h>
 #include "port_system.h"
+#include "port_led.h"
 #include "fsm_thermostat.h"
+
+/* Defines and macros --------------------------------------------------------*/
+//#define USE_LED_ON
 
 /* MAIN FUNCTION */
 
@@ -26,6 +30,14 @@ int main()
 
     /* Init board */
     port_system_init();
+
+#ifdef USE_LED_ON
+    // Initialize the GPIOs for the LED on which might be off and it is not part of the FSM
+    port_led_init(&led_on);
+    port_led_on(&led_on);
+    port_system_delay_ms(500); // Wait for 500 ms
+    port_led_off(&led_on);
+#endif
 
     // Create an thermostat FSM and get a pointer to it
     fsm_t *p_fsm_thermostat = fsm_thermostat_new(&led_heater_active, &led_comfort_temperature, &temp_sensor_thermostat);

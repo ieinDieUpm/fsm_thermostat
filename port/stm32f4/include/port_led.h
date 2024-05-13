@@ -16,10 +16,12 @@
 
 /* Defines and macros --------------------------------------------------------*/
 // HW Nucleo-STM32F446RE:
-#define LED_HEAT_GPIO GPIOA /*!< GPIO port of the heating LED */
-#define LED_HEAT_PIN 5      /*!< GPIO pin of the heating LED */
-#define LED_COOL_GPIO GPIOB /*!< GPIO port of the deactivation LED */
-#define LED_COOL_PIN 4      /*!< GPIO pin of the deactivation LED */
+#define LED_HEAT_GPIO GPIOB    /*!< GPIO port of the heating LED */
+#define LED_HEAT_PIN 4         /*!< GPIO pin of the heating LED */
+#define LED_COMFORT_GPIO GPIOB /*!< GPIO port of the deactivation LED */
+#define LED_COMFORT_PIN 5      /*!< GPIO pin of the deactivation LED */
+#define LED_ON_GPIO GPIOB      /*!< GPIO port of the general purpose LED */
+#define LED_ON_PIN 3           /*!< GPIO pin of the general purpose LED */
 
 /* Typedefs --------------------------------------------------------------------*/
 /**
@@ -32,8 +34,9 @@ typedef struct
 } port_led_hw_t;
 
 /* Global variables -----------------------------------------------------------*/
-extern port_led_hw_t led_heater_active; /*!< Heating LED of the thermostat. */
+extern port_led_hw_t led_heater_active;       /*!< Heating LED of the thermostat. */
 extern port_led_hw_t led_comfort_temperature; /*!< Cooling LED of the thermostat. */
+extern port_led_hw_t led_on;                  /*!< General purpose LED. */
 
 /* Function prototypes and explanations ---------------------------------------*/
 /**
