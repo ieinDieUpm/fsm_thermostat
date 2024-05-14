@@ -2,11 +2,11 @@
 
 This project implements a thermostat with an analog LM35 temperature sensor, and 2 LEDs. The HW configuration is shown in the following picture:
 
-![HW Alarm](docs/assets/imgs/fsm_thermostat_bb.png)
+![HW Thersmostat](docs/assets/imgs/fsm_thermostat_bb.png)
 
 The system uses an FSM to manage the different states of the system and hardware. This picture shows the FSM of the system:
 
-![FSM Alarm](docs/assets/imgs/fsm_thermostat.png)
+![FSM Thersmostat](docs/assets/imgs/fsm_thermostat.png)
 
 The thermostat makes a measurement every time its timer is triggered. The measurement is done by the ADC peripheral. The ADC is configured to sample the temperature sensor in single mode. The timer is configured in the `PORT` file of the system.
 
