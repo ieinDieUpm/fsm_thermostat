@@ -17,7 +17,7 @@
 #include "port_system.h"
 
 /* Global variables -----------------------------------------------------------*/
-port_temp_hw_t temp_sensor_thermostat = {.p_port = TEMP_SENSOR_THERMOSTAT_GPIO, .pin = TEMP_SENSOR_THERMOSTAT_PIN, .p_adc = TEMP_SENSOR_THERMOSTAT_ADC, .temperature_celsius = 1.0};
+port_temp_hw_t temp_sensor_thermostat = {.p_port = TEMP_SENSOR_THERMOSTAT_GPIO, .pin = TEMP_SENSOR_THERMOSTAT_PIN, .p_adc = TEMP_SENSOR_THERMOSTAT_ADC, .adc_channel = TEMP_SENSOR_THERMOSTAT_ADC_CHANNEL, .temperature_celsius = 0};
 
 /* Private functions */
 
@@ -55,7 +55,7 @@ void port_temp_sensor_init(port_temp_hw_t *p_temp)
     port_system_gpio_config(p_temp->p_port, p_temp->pin, GPIO_MODE_ANALOG, GPIO_PUPDR_NOPULL);
 
     // Initialize the ADC with 12-bit resolution and EOC interrupt enable
-    port_system_adc_single_ch_init(p_temp->p_adc, p_temp->pin, ADC_RESOLUTION_12B | ADC_EOC_INTERRUPT_ENABLE);
+    port_system_adc_single_ch_init(p_temp->p_adc, p_temp->adc_channel, ADC_RESOLUTION_12B | ADC_EOC_INTERRUPT_ENABLE);
 
     // Enable the ADC global interrupt
     port_system_adc_interrupt_enable(1, 0);

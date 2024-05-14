@@ -19,9 +19,10 @@
 
 /* Defines and macros --------------------------------------------------------*/
 // HW Nucleo-STM32F446RE:
-#define TEMP_SENSOR_THERMOSTAT_GPIO GPIOA /*!< GPIO port of the temperature sensor in the Nucleo board */
-#define TEMP_SENSOR_THERMOSTAT_PIN 0      /*!< GPIO pin of the temperature sensor in the Nucleo board */
-#define TEMP_SENSOR_THERMOSTAT_ADC ADC1   /*!< ADC of the temperature sensor in the Nucleo board */
+#define TEMP_SENSOR_THERMOSTAT_GPIO GPIOA    /*!< GPIO port of the temperature sensor in the Nucleo board */
+#define TEMP_SENSOR_THERMOSTAT_PIN 0         /*!< GPIO pin of the temperature sensor in the Nucleo board */
+#define TEMP_SENSOR_THERMOSTAT_ADC ADC1      /*!< ADC of the temperature sensor in the Nucleo board */
+#define TEMP_SENSOR_THERMOSTAT_ADC_CHANNEL 0 /*!< ADC channel of the temperature sensor in the Nucleo board */
 
 /* Typedefs --------------------------------------------------------------------*/
 /**
@@ -32,6 +33,7 @@ typedef struct
     GPIO_TypeDef *p_port;       /*!< GPIO where the temperature is connected */
     uint8_t pin;                /*!< Pin/line where the temperature is connected */
     ADC_TypeDef *p_adc;         /*!< ADC where the temperature is connected */
+    uint32_t adc_channel;       /*!< ADC channel where the temperature is connected */
     double temperature_celsius; /*!< Temperature in Celsius */
 } port_temp_hw_t;
 
@@ -51,7 +53,7 @@ double port_temp_sensor_get_temperature(port_temp_hw_t *pir_sensor);
  * @param p_temp Pointer to the temperature sensor structure.
  * @param adc_value ADC value of the temperature sensor.
  */
-void port_temp_sensor_save_adc_value(port_temp_hw_t* p_temp, double adc_value);
+void port_temp_sensor_save_adc_value(port_temp_hw_t *p_temp, double adc_value);
 
 /**
  * @brief Initializes the temperature sensor.
