@@ -1,6 +1,10 @@
 # Thermostat with FSM and ADC
 
-This project implements a thermostat with an analog LM35 temperature sensor, and 2 LEDs. The HW configuration is shown in the following picture:
+This project implements a thermostat with an analog LM35 temperature sensor, and 2 LEDs.
+
+You can access the source code of the project in the following link: [Thermostat with FSM and ADC](https://github.com/ieinDieUpm/fsm_thermostat).
+
+The HW configuration is shown in the following picture:
 
 ![HW Thersmostat](docs/assets/imgs/fsm_thermostat_bb.png)
 
