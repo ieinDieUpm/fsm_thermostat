@@ -31,7 +31,6 @@ struct fsm_thermostat_t
     uint32_t last_time_events[THERMOSTAT_HISTORY]; /*!< Last times of events detected */
     uint8_t event_idx;                             /*!< Index of the last event */
     double threshold_temp_celsius;                 /*!< Threshold temperature to activate the thermostat Celsius */
-    uint32_t timer_period_sec;                     /*!< Period of the timer to measure the temperature */
 };
 
 /* State machine input or transition functions */
@@ -179,9 +178,6 @@ void fsm_thermostat_init(fsm_thermostat_t *p_fsm_thermostat, uint32_t led_heat_i
 
     // Initialize the threshold temperature
     p_fsm->threshold_temp_celsius = THERMOSTAT_DEFAULT_THRESHOLD;
-
-    // Initialize the timer to measure the temperature
-    p_fsm->timer_period_sec = THERMOSTAT_TIMEOUT_SEC;
 
     // Initialize the timer
     port_thermostat_timer_setup(PORT_THERMOSTAT_ID);

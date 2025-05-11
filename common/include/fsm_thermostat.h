@@ -2,7 +2,7 @@
  * @file fsm_thermostat.h
  * @author Josué Pagán (j.pagan@upm.es)
  * @brief Header file for the thermostat FSM.
- * @date 2024-05-01
+ * @date 2025-05-01
  *
  */
 
@@ -20,7 +20,6 @@
 
 /* Defines and enums ----------------------------------------------------------*/
 /* Defines */
-#define THERMOSTAT_TIMEOUT_SEC 1        /*!< Timeout for the thermostat to be activated */
 #define THERMOSTAT_HISTORY 10           /*!< Number of events to store in the thermostat */
 #define THERMOSTAT_DEFAULT_THRESHOLD 25 /*!< Threshold temperature to activate the thermostat */
 
@@ -77,8 +76,8 @@ uint8_t fsm_thermostat_get_status(fsm_thermostat_t *p_this);
 
 /**
  * @brief Fires the thermostat FSM.
- * 
- * @param p_fsm Pointer to the thermostat FSM structure. 
+ *
+ * @param p_fsm Pointer to the thermostat FSM structure.
  */
 void fsm_thermostat_fire(fsm_thermostat_t *p_fsm);
 
