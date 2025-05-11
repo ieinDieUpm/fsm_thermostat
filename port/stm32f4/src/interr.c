@@ -95,10 +95,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *handler_tim)
  */
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *p_handler_adc)
 {
-  if (p_handler_adc->Instance == ADC1)
+  if (p_handler_adc->Instance == STM32F4_TEMP_SENSOR_THERMOSTAT_ADC)
   {
     uint32_t adc = HAL_ADC_GetValue(p_handler_adc);
-    // Guarda o procesa el valor como necesites
     printf("ADC value = %lu\n", adc);
 
     // Call the function to save the ADC value
