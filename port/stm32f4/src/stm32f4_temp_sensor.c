@@ -81,7 +81,6 @@ void port_temp_sensor_save_adc_value(uint32_t temp_sensor_id, double adc_value)
     printf("Temperature: %ld.%d oC\n", (uint32_t)(p_temp->temperature_celsius), (uint8_t)((10 * p_temp->temperature_celsius)) % 10);
 }
 
-
 void port_temp_sensor_init(uint32_t temp_sensor_id)
 {
     // Get the temperature structure from the array
@@ -105,7 +104,8 @@ void port_temp_sensor_init(uint32_t temp_sensor_id)
     {
         __HAL_RCC_GPIOC_CLK_ENABLE();
     }
-    else {
+    else
+    {
         // Error: Invalid GPIO port
         return;
     }
@@ -163,7 +163,7 @@ void port_temp_sensor_init(uint32_t temp_sensor_id)
     temp_sensor_channel.Channel = p_temp->adc_channel; // Debe ser tipo ADC_CHANNEL_x
     temp_sensor_channel.Rank = 1;
     temp_sensor_channel.SamplingTime = ADC_SAMPLETIME_3CYCLES;
-    
+
     // Configurar el canal
     HAL_ADC_ConfigChannel(adc_handle, &temp_sensor_channel);
 

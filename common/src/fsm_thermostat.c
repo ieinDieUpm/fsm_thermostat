@@ -124,16 +124,6 @@ fsm_trans_t fsm_trans_thermostat[] = {
 
 uint32_t fsm_thermostat_get_last_time_event(fsm_thermostat_t *p_fsm, uint8_t event)
 {
-    // Look for the last time the event was detected, if it was detected. If not, return 0
-/*    for (int i = 0; i < THERMOSTAT_HISTORY; i++)
-    {
-        if (p_fsm->last_events[i] == event)
-        {
-            return p_fsm->last_time_events[i];
-        }
-    }
-    return 0;
-*/
     // Return the last event detected
     if (p_fsm->event_idx == 0)
     {
@@ -213,7 +203,6 @@ fsm_thermostat_t *fsm_thermostat_new(uint32_t led_heat_id, uint32_t led_comfort_
 
     return p_fsm_thermostat;
 }
-
 
 void fsm_thermostat_fire(fsm_thermostat_t *p_fsm)
 {
