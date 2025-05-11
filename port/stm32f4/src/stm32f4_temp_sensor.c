@@ -18,6 +18,9 @@
 /* Microcontroller dependent includes */
 #include "stm32f4_temp_sensor.h"
 
+/* Defines and macros --------------------------------------------------------*/
+#define MY_ADC_RESOLUTION 12 /*!< ADC resolution in bits */
+
 /* Typedefs --------------------------------------------------------------------*/
 /**
  * @brief Structure to define the HW dependencies of a temperature sensor.
@@ -72,28 +75,40 @@ void port_temp_sensor_save_adc_value(uint32_t temp_sensor_id, double adc_value)
 
     // Convert the ADC value to temperature in Celsius.
     // LM35 sensor has a linear response of 10mV/°C
-    p_temp->temperature_celsius = _adc_to_mvolts(adc_value, 12) / 10.0;
+    p_temp->temperature_celsius = _adc_to_mvolts(adc_value, MY_ADC_RESOLUTION) / 10.0;
 
     // There are few problems to print double values using printf with SWO. The value is multiplied by 10 and printed as an integer the decimal point is added manually.
     printf("Temperature: %ld.%d oC\n", (uint32_t)(p_temp->temperature_celsius), (uint8_t)((10 * p_temp->temperature_celsius)) % 10);
 }
+
+
 void port_temp_sensor_init(uint32_t temp_sensor_id)
 {
     // Get the temperature structure from the array
     stm32f4_temp_hw_t *p_temp = &temp_sensor_thermostat_arr[temp_sensor_id];
 
-    // 1. Inicializar GPIO como entrada analógica
+    // Inicializar GPIO como entrada analógica
     GPIO_TypeDef *p_port = p_temp->p_port;
     uint16_t pin = p_temp->pin;
 
     GPIO_InitTypeDef temp_sensor_gpio = {0};
 
     if (p_port == GPIOA)
+    {
         __HAL_RCC_GPIOA_CLK_ENABLE();
+    }
     else if (p_port == GPIOB)
+    {
         __HAL_RCC_GPIOB_CLK_ENABLE();
+    }
     else if (p_port == GPIOC)
+    {
         __HAL_RCC_GPIOC_CLK_ENABLE();
+    }
+    else {
+        // Error: Invalid GPIO port
+        return;
+    }
 
     temp_sensor_gpio.Pin = pin;
     temp_sensor_gpio.Mode = GPIO_MODE_ANALOG;
@@ -106,7 +121,7 @@ void port_temp_sensor_init(uint32_t temp_sensor_id)
     // Get the ADC handler
     ADC_HandleTypeDef *adc_handle = &p_temp->adc_handle;
 
-    // 2. Habilitar reloj ADC
+    // Habilitar reloj ADC
     if (p_adc == ADC1)
     {
         __HAL_RCC_ADC1_CLK_ENABLE();
@@ -120,22 +135,14 @@ void port_temp_sensor_init(uint32_t temp_sensor_id)
         __HAL_RCC_ADC3_CLK_ENABLE();
     }
 
-    // 3. Reset del ADC (equivalente CMSIS)
-    __HAL_RCC_ADC_FORCE_RESET();
-    __NOP();
-    __HAL_RCC_ADC_RELEASE_RESET();
-
-#if defined(USE_ADC_TEMP_VREFINT)
-    // Activar sensor de temperatura y Vrefint si se usa
-    __HAL_ADC_TEMPERATURE_SENSOR_ENABLE();
-#endif
-
-    // 4. Asignar instancia y deshabilitar antes de iniciar
+    // Asignar instancia y deshabilitar antes de iniciar
     adc_handle->Instance = p_adc;
     __HAL_ADC_DISABLE(adc_handle);
 
-    // 5. Configuración HAL del ADC
+    // Configuración HAL del ADC
     adc_handle->Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+
+    // Estas configuraciones se pueden quitar, son las que vienen por defecto
     adc_handle->Init.Resolution = ADC_RESOLUTION_12B;
     adc_handle->Init.ScanConvMode = DISABLE;
     adc_handle->Init.ContinuousConvMode = DISABLE;
@@ -148,28 +155,19 @@ void port_temp_sensor_init(uint32_t temp_sensor_id)
     adc_handle->Init.DMAContinuousRequests = DISABLE;
     adc_handle->Init.EOCSelection = ADC_EOC_SINGLE_CONV;
 
-    if (HAL_ADC_Init(adc_handle) != HAL_OK)
-    {
-        printf("ERROR: HAL_ADC_Init failed\n");
-        while (1)
-            ;
-    }
+    // Inicializar el ADC
+    HAL_ADC_Init(adc_handle);
 
-    // 6. Configuración del canal
+    // Configuración del canal
     ADC_ChannelConfTypeDef temp_sensor_channel = {0};
     temp_sensor_channel.Channel = p_temp->adc_channel; // Debe ser tipo ADC_CHANNEL_x
     temp_sensor_channel.Rank = 1;
     temp_sensor_channel.SamplingTime = ADC_SAMPLETIME_3CYCLES;
-    temp_sensor_channel.Offset = 0;
+    
+    // Configurar el canal
+    HAL_ADC_ConfigChannel(adc_handle, &temp_sensor_channel);
 
-    if (HAL_ADC_ConfigChannel(adc_handle, &temp_sensor_channel) != HAL_OK)
-    {
-        printf("ERROR: HAL_ADC_ConfigChannel failed\n");
-        while (1)
-            ;
-    }
-
-    // 7. Habilitar interrupciones en NVIC
+    // Habilitar interrupciones en NVIC
     HAL_NVIC_SetPriority(p_temp->adc_irq, p_temp->adc_irq_prio, p_temp->adc_irq_subprio);
     HAL_NVIC_EnableIRQ(p_temp->adc_irq);
 }

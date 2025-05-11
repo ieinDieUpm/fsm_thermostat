@@ -16,7 +16,6 @@
 /* Defines */
 #define PORT_LED_HEAT_ID 0    /*!< Heating LED identifier @hideinitializer */
 #define PORT_LED_COMFORT_ID 1 /*!< Cooling LED identifier @hideinitializer */
-#define PORT_LED_ON_ID 2      /*!< General purpose LED identifier @hideinitializer */
 
 /* Function prototypes and explanations ---------------------------------------*/
 /**

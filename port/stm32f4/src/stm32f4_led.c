@@ -42,10 +42,6 @@ static stm32f4_led_hw_t leds_arr[] = {
     [PORT_LED_COMFORT_ID] = {
         .p_port = STM32F4_LED_COMFORT_GPIO_PORT,
         .pin = STM32F4_LED_COMFORT_GPIO_PIN,
-    },
-    [PORT_LED_ON_ID] = {
-        .p_port = STM32F4_LED_ON_GPIO_PORT,
-        .pin = STM32F4_LED_ON_GPIO_PIN,
     }
 };
 

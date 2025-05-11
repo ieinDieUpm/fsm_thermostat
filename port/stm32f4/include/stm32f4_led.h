@@ -21,7 +21,5 @@
 #define STM32F4_LED_HEAT_GPIO_PIN GPIO_PIN_4    /*!< GPIO pin of the heating LED */
 #define STM32F4_LED_COMFORT_GPIO_PORT GPIOB     /*!< GPIO port of the deactivation LED */
 #define STM32F4_LED_COMFORT_GPIO_PIN GPIO_PIN_5 /*!< GPIO pin of the deactivation LED */
-#define STM32F4_LED_ON_GPIO_PORT GPIOB          /*!< GPIO port of the general purpose LED */
-#define STM32F4_LED_ON_GPIO_PIN GPIO_PIN_3      /*!< GPIO pin of the general purpose LED */
 
 #endif /* STM32F4_LED_H */

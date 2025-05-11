@@ -2,7 +2,7 @@
 
 This project implements a thermostat with an analog LM35 temperature sensor, and 2 LEDs.
 
-You can access the source code of the project in the following link: [Thermostat with FSM and ADC](https://github.com/ieinDieUpm/fsm_thermostat).
+You can access the source code of the project in the following link: [Thermostat with FSM and ADC](https://github.com/ieinDieUpm/fsm_thermostat/tree/hal_version).
 
 The HW configuration is shown in the following picture:
 
@@ -12,65 +12,52 @@ The system uses an FSM to manage the different states of the system and hardware
 
 ![FSM Thersmostat](docs/assets/imgs/fsm_thermostat.png)
 
-The thermostat makes a measurement every time its timer is triggered. The measurement is done by the ADC peripheral. The ADC is configured to sample the temperature sensor in single mode. The timer is configured in the `PORT` file of the system.
+The thermostat makes a measurement every time its timer is triggered. The measurement is done by the ADC peripheral. The ADC is configured to sample the temperature sensor in single mode. The timer is configured in the `port_thermostat_timer_setup()` function. The timer is configured to trigger an interrupt every second, and it is configured with the following settings:
 
-| Parameter     | Value                        |
-| ------------- | ---------------------------- |
-| Define label  | THERMOSTAT_MEASUREMENT_TIMER |
-| Timer         | TIM2                         |
-| Interrupt     | TIM2_IRQHandler()            |
-| Time interval | 1 second                     |
-| Priority      | 2                            |
-| Subpriority   | 0                            |
+| Parameter     | Value                                |
+| ------------- | ------------------------------------ |
+| Define label  | STM32F4_THERMOSTAT_MEASUREMENT_TIMER |
+| Timer         | TIM2                                 |
+| Interrupt     | TIM2_IRQHandler()                    |
+| Time interval | 1 second                             |
+| Priority      | 2                                    |
+| Subpriority   | 0                                    |
 
-You can generate as many thermostat as you want by creating a new FSM and assigning the corresponding peripherals to the system. The system which is implemented in the `main.c` file. The system uses the following peripherals:
+You can generate as many thermostat as you want by creating a new FSM and assigning the IDs of the corresponding peripherals to the system. The system is implemented in the `main.c` file. The system uses the following peripherals:
 
 ## Temperature sensor
 
-The temperature sensor used in the system is the LM35 (see [LM35 datasheet](https://www.ti.com/product/es-mx/LM35)). The sensor is located in the shield provided by the university. The sensor is connected to the pin `PA0`. The sensor is configured as an analog input with no push-pull resistor. The sensor is sampled in single mode with a sampling period given by the interruptions of a timer. All the configurations of the ADC are by default. The ADC is configured to interrupt when the conversion is completed. The ADC is configured with the following settings:
+The temperature sensor used in the system is the LM35 (see [LM35 datasheet](https://www.ti.com/product/es-mx/LM35)). The sensor is located in the shield provided by the university. The sensor is connected to the pin `PA0`. The sensor is configured as an analog input with no push-pull resistor, and it is sampled in single mode with a sampling period given by the interruptions of a timer. All the configurations of the ADC are by default. The ADC is configured to interrupt when the conversion is completed. The ADC is configured with the following settings:
 
-| Parameter     | Value                  |
-| ------------- | ---------------------- |
-| Variable name | temp_sensor_thermostat |
-| Pin           | PA0 (A0 on Nucleo)     |
-| ADC           | ADC1                   |
-| Channel       | 0                      |
-| Mode          | Analog                 |
-| Pull up/ down | No push no pull        |
-| ISR           | ADC_IRQHandler()       |
-| Priority      | 1                      |
-| Subpriority   | 0                      |
+| Parameter     | Value                          |
+| ------------- | ------------------------------ |
+| Define ID     | PORT_TEMP_SENSOR_THERMOSTAT_ID |
+| Pin           | PA0 (A0 on Nucleo)             |
+| ADC           | ADC1                           |
+| Channel       | 0                              |
+| Mode          | Analog                         |
+| Pull up/ down | No push no pull                |
+| ISR           | ADC_IRQHandler()               |
+| Priority      | 1                              |
+| Subpriority   | 0                              |
 
 ## LEDs
 
-There are two LEDs in the system. The first LED is the `led_heater_active` (red) and the second LED is the `led_comfort_temperature` (blue). The `led_heater_active` is used to indicate that the temperature is below the threshold and the heater activates to warm the thermal system. The `led_comfort_temperature` is used to indicate that the temperature is above the threshold and the thermal system is off. The LEDs are within an RGB LED soldered in the shield provided by the university. The LEDs are connected to the pins `PB4` and `PB5`. The LEDs are configured as outputs with no push-pull resistor. The LEDs are turned on when the system starts. The LEDs are configured with the following settings:
+There are two LEDs in the system. The first LED is the `PORT_LED_HEAT_ID` (red) and the second LED is the `PORT_LED_COMFORT_ID` (blue). The `PORT_LED_HEAT_ID` is used to indicate that the temperature is below the threshold and the heater activates to warm the thermal system. The `PORT_LED_COMFORT_ID` is used to indicate that the temperature is above the threshold and the thermal system is off. The LEDs are within an RGB LED soldered in the shield provided by the university. The LEDs are connected to the pins `PB4` and `PB5`. The LEDs are configured as outputs with no push-pull resistor. The LEDs are turned off when the system starts. The LEDs are configured with the following settings:
 
-| Parameter     | Value                   |
-| ------------- | ----------------------- |
-| Variable name | led_comfort_temperature |
-| Pin           | PB5 (D4 on Nucleo)      |
-| Mode          | Output                  |
-| Pull up/ down | No push no pull         |
+| Parameter     | Value               |
+| ------------- | ------------------- |
+| Variable name | PORT_LED_COMFORT_ID |
+| Pin           | PB5 (D4 on Nucleo)  |
+| Mode          | Output              |
+| Pull up/ down | No push no pull     |
 
 | Parameter     | Value              |
 | ------------- | ------------------ |
-| Variable name | led_heater_active  |
+| Variable name | PORT_LED_HEAT_ID   |
 | Pin           | PB4 (D5 on Nucleo) |
 | Mode          | Output             |
 | Pull up/ down | No push no pull    |
-
-There is also a third LED, the `led_on` (green), which is used to indicate that the system has started. This LED is not part of the system. The `led_on` is turned on when the system starts and is turned off after 500 ms. This LED can be disabled by commenting the line `#define USE_LED_ON` in the `main.c` file. The `led_on` is connected to the pin `PB3`.
-
-| Parameter     | Value              |
-| ------------- | ------------------ |
-| Variable name | led_on             |
-| Pin           | PB3 (D3 on Nucleo) |
-| Mode          | Output             |
-| Pull up/ down | No push no pull    |
-
-> [!WARNING]
-> **If you want to use the `printf()` function using the SWO, you must change the pin of the `led_on` to another pin. The SWO pin is the `PB3` pin. If you use the `led_on`, the SWO pin will not work.**
-> If you want to use the SWO, you must comment the line `#define USE_LED_ON` in the `main.c` file. **In this case, **if you are using the shield provided by the university, the pin `PB3` will be active turning on the `led_on` constantly and you won't see pure red or blue LEDs but a mix of colors instead.**
 
 Look at the following picture to see the shield provided by the university:
 
